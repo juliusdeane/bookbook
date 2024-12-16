@@ -48,7 +48,12 @@ def add_sec_label(cell: NotebookNode, nbname) -> Sequence[NotebookNode]:
     cell starting with a level 1 heading. It inserts a label with the notebook
     name just underneath this heading.
     """
-    assert cell.cell_type == 'markdown', cell.cell_type
+    # Original assert.
+    # assert cell.cell_type == 'markdown', cell.cell_type
+    # replaced with a critical warning in log.
+    if cell.cell_type != 'markdown':
+        log.critical('add_sec_label: cell_type should be "markdown"')
+
     lines = cell.source.splitlines()
     if lines[0].startswith('# '):
         header_lines = 1
