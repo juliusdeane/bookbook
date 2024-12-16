@@ -25,16 +25,21 @@ from nbconvert.writers import FilesWriter
 from nbconvert.utils.pandoc import pandoc
 from .filter_links import convert_links
 
+
 log = logging.getLogger(__name__)
+
 
 def new_latex_cell(source=''):
     return NotebookNode(
-        cell_type='raw',
-        metadata=NotebookNode(raw_mimetype='text/latex'),
-        source=source,
+        cell_type='raw',  # noqa
+        metadata=NotebookNode(raw_mimetype='text/latex'),  # noqa
+        source=source,  # noqa
     )
 
-class NoHeader(Exception): pass
+
+class NoHeader(Exception):
+    pass
+
 
 def add_sec_label(cell: NotebookNode, nbname) -> Sequence[NotebookNode]:
     """Adds a Latex \\label{} under the chapter heading.
@@ -56,12 +61,13 @@ def add_sec_label(cell: NotebookNode, nbname) -> Sequence[NotebookNode]:
     intro_remainder = '\n'.join(lines[header_lines:]).strip()
     res = [
         new_markdown_cell(header),
-        new_latex_cell('\label{sec:%s}' % nbname)
+        new_latex_cell('\label{sec:%s}' % nbname)  # noqa
     ]
     res[0].metadata = cell.metadata
     if intro_remainder:
         res.append(new_markdown_cell(intro_remainder))
     return res
+
 
 def combine_notebooks(notebook_files: Sequence[Path]) -> NotebookNode:
     combined_nb = new_notebook()
@@ -76,7 +82,7 @@ def combine_notebooks(notebook_files: Sequence[Path]) -> NotebookNode:
         try:
             combined_nb.cells.extend(add_sec_label(nb.cells[0], nbname))
         except NoHeader:
-            raise NoHeader("Failed to find header in " + filename)
+            raise NoHeader(f"Failed to find header in {filename}")
 
         combined_nb.cells.extend(nb.cells[1:])
 
@@ -86,21 +92,26 @@ def combine_notebooks(notebook_files: Sequence[Path]) -> NotebookNode:
     log.info('Combined %d files' % count)
     return combined_nb
 
+
 mydir = os.path.dirname(os.path.abspath(__file__))
 filter_links = os.path.join(mydir, 'filter_links.py')
+
 
 def pandoc_convert_links(source):
     return pandoc(source, 'markdown', 'latex', extra_args=['--filter', filter_links])
 
+
 class MyLatexExporter(LatexExporter):
     def default_filters(self):
         yield from super().default_filters()
-        yield ('resolve_references', convert_links)
+        yield 'resolve_references', convert_links
+
 
 class MyLatexPDFExporter(PDFExporter):
     def default_filters(self):
         yield from super().default_filters()
-        yield ('resolve_references', convert_links)
+        yield 'resolve_references', convert_links
+
 
 def add_preamble(extra_preamble_file, exporter):
     if extra_preamble_file is None:
@@ -114,20 +125,20 @@ def add_preamble(extra_preamble_file, exporter):
     template_path = Path(td, 'with_extra_preamble.tplx')
     with template_path.open('w') as f:
         f.write("((* extends 'article.tplx' *))\n"
-                '((* block header *))\n'
-                '((( super() )))\n'
-               )
-        f.write(extra_preamble)
-        f.write('((* endblock header *))\n'
+                "((* block header *))\n"
+                "((( super() )))\n"
                 )
+        f.write(extra_preamble)
+        f.write('((* endblock header *))\n')
 
-    # Not using append, because we need an assignment to trigger traitlet change
+    # Not using append, because we need an assignment to trigger trailer change
     exporter.template_path = exporter.template_path + [td]
     exporter.template_file = 'with_extra_preamble'
 
+
 def export(combined_nb: NotebookNode, output_file: Path, pdf=False,
            template_file=None):
-    resources = {}
+    resources = dict()
     resources['unique_key'] = 'combined'
     resources['output_files_dir'] = 'combined_files'
 
@@ -139,10 +150,12 @@ def export(combined_nb: NotebookNode, output_file: Path, pdf=False,
     output, resources = exporter.from_notebook_node(combined_nb, resources)
     writer.write(output, resources, notebook_name=output_file.stem)
 
+
 def combine_and_convert(source_dir: Path, output_file: Path, pdf=False, template_file=None):
     notebook_files = sorted(source_dir.glob('*-*.ipynb'))
     combined_nb = combine_notebooks(notebook_files)
     export(combined_nb, output_file, pdf=pdf, template_file=template_file)
+
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description='Convert a set of notebooks to PDF via Latex')
@@ -158,6 +171,7 @@ def main(argv=None):
 
     logging.basicConfig(level=logging.INFO)
     combine_and_convert(args.source_dir, args.output_file, args.pdf, args.template)
+
 
 if __name__ == '__main__':
     main()
