@@ -3,3 +3,6 @@
 __pycache__/
 /dist/
 .ipynb_checkpoints
+
+# Setup tools
+bookbook.egg-info/
