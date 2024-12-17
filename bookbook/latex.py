@@ -25,6 +25,8 @@ from nbconvert.exporters import PDFExporter, LatexExporter
 from nbconvert.preprocessors import TagRemovePreprocessor
 from nbconvert.writers import FilesWriter
 from nbconvert.utils.pandoc import pandoc
+from traitlets.config import Config
+
 from .filter_links import convert_links
 
 
@@ -156,15 +158,18 @@ def export(combined_nb: NotebookNode, output_file: Path, pdf=False,
 
     # BY DEFAULT: remove cells with this tag text: "hidden"
     # As:  --TagRemovePreprocessor.remove_cell_tags='{"hide_code"}'
-    tag_preprocessor = TagRemovePreprocessor()
-    tag_preprocessor.enabled = True
-    tag_preprocessor.remove_cell_tags = [remove_tag]
+    c = Config()
+    c.TagRemovePreprocessor.remove_cell_tags = (remove_tag, )
+    c.PDFExporter.preprocessors = ["nbconvert.preprocessors.TagRemovePreprocessor"]
+    # c.PDFExporter.exclude_input_prompt = True
+    # c.PDFExporter.exclude_output_prompt = True
+    # c.PDFExporter.exclude_input = True
 
     log.info('Converting to %s', 'pdf' if pdf else 'latex')
-    log.critical('===> PREPROCESSOR')
-    exporter = MyLatexPDFExporter() if pdf else MyLatexExporter()
-    # First thing to do, associate preprocessor.
-    exporter.preprocessors = [tag_preprocessor]
+
+    exporter = MyLatexPDFExporter(config=c) if pdf else MyLatexExporter(config=c)
+    exporter.register_preprocessor(TagRemovePreprocessor(config=c),
+                                   enabled=True)
 
     if template_file is not None:
         exporter.template_file = str(template_file)
