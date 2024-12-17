@@ -4,10 +4,16 @@
 Converts links between notebooks to Latex cross-references.
 """
 import re
+import logging
 
 from pandocfilters import toJSONFilter, applyJSONFilters, RawInline
 
+
+logger = logging.getLogger(__name__)
+
+
 def convert_link(key, val, fmt, meta):
+    logger.critical(f'KEY=[{key}] VAL=[{val}]')
     if key == 'Link':
         target = val[2][0]
         # Links to other notebooks
@@ -25,8 +31,10 @@ def convert_link(key, val, fmt, meta):
 
     # Other elements will be returned unchanged.
 
+
 def convert_links(source):
     return applyJSONFilters([convert_link], source)
+
 
 if __name__ == "__main__":
     toJSONFilter(convert_link)

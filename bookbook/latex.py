@@ -161,8 +161,16 @@ def export(combined_nb: NotebookNode, output_file: Path, pdf=False,
     writer.write(output, resources, notebook_name=output_file.stem)
 
 
-def combine_and_convert(source_dir: Path, output_file: Path, pdf=False, template_file=None):
-    notebook_files = sorted(source_dir.glob('*-*.ipynb'))
+def combine_and_convert(source_dir: Path,
+                        output_file: Path,
+                        pdf=False,
+                        template_file=None,
+                        files_pattern: str = '*-*.ipynb'):
+    """
+    files_pattern: which files to import (defaults to *-*.ipynb).
+    source_dir: Source directory or (".").
+    """
+    notebook_files = sorted(source_dir.glob(files_pattern))
     combined_nb = combine_notebooks(notebook_files)
     export(combined_nb, output_file, pdf=pdf, template_file=template_file)
 

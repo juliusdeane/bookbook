@@ -24,7 +24,7 @@ setup(
     packages=find_packages(),
     version=version,
     install_requires=[
-        'jsonschema==4.17.3',
+        'jsonschema>=4.17.3',
         'nbconvert>=7.16.4',
         'pandoc>=2.4',
         'pandocfilters>=1.5.1',
