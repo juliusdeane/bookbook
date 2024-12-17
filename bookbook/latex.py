@@ -151,7 +151,10 @@ def add_preamble(extra_preamble_file, exporter):
 
 
 def export(combined_nb: NotebookNode, output_file: Path, pdf=False,
-           template_file=None, remove_tag: str = 'hidden'):
+           template_file=None,
+           remove_cell_tags: tuple = ('hidden', 'remove_cell'),
+           remove_all_outputs_tags: tuple = ('hidden', 'remove_output'),
+           remove_input_tags: tuple = ('hidden', 'remove_input'),):
     resources = dict()
     resources['unique_key'] = 'combined'
     resources['output_files_dir'] = 'combined_files'
@@ -159,7 +162,10 @@ def export(combined_nb: NotebookNode, output_file: Path, pdf=False,
     # BY DEFAULT: remove cells with this tag text: "hidden"
     # As:  --TagRemovePreprocessor.remove_cell_tags='{"hide_code"}'
     c = Config()
-    c.TagRemovePreprocessor.remove_cell_tags = (remove_tag, )
+    c.TagRemovePreprocessor.remove_cell_tags = remove_cell_tags
+    c.TagRemovePreprocessor.remove_all_outputs_tags = remove_all_outputs_tags
+    c.TagRemovePreprocessor.remove_input_tags = remove_input_tags
+
     c.PDFExporter.preprocessors = ["nbconvert.preprocessors.TagRemovePreprocessor"]
     # c.PDFExporter.exclude_input_prompt = True
     # c.PDFExporter.exclude_output_prompt = True
