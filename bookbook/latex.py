@@ -196,6 +196,10 @@ def combine_and_convert(source_dir: Path,
     """
     notebook_files = sorted(source_dir.glob(files_pattern))
     combined_nb = combine_notebooks(notebook_files)
+    # Can remove cells.
+    # remove_cell_tags: tuple = ('hidden', 'remove_cell'),
+    # remove_all_outputs_tags: tuple = ('hidden', 'remove_output'),
+    # remove_input_tags: tuple = ('hidden', 'remove_input'),):
     export(combined_nb, output_file, pdf=pdf, template_file=template_file)
 
 
