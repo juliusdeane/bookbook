@@ -21,6 +21,8 @@ import nbformat
 from nbformat import NotebookNode
 from nbformat.v4 import new_notebook, new_markdown_cell
 from nbconvert.exporters import PDFExporter, LatexExporter
+# To be able to filter particular tags: i.e. "hidden"
+from nbconvert.preprocessors import TagRemovePreprocessor
 from nbconvert.writers import FilesWriter
 from nbconvert.utils.pandoc import pandoc
 from .filter_links import convert_links
@@ -147,15 +149,26 @@ def add_preamble(extra_preamble_file, exporter):
 
 
 def export(combined_nb: NotebookNode, output_file: Path, pdf=False,
-           template_file=None):
+           template_file=None, remove_tag: str = 'hidden'):
     resources = dict()
     resources['unique_key'] = 'combined'
     resources['output_files_dir'] = 'combined_files'
 
+    # BY DEFAULT: remove cells with this tag text: "hidden"
+    # As:  --TagRemovePreprocessor.remove_cell_tags='{"hide_code"}'
+    tag_preprocessor = TagRemovePreprocessor()
+    tag_preprocessor.enabled = True
+    tag_preprocessor.remove_cell_tags = [remove_tag]
+
     log.info('Converting to %s', 'pdf' if pdf else 'latex')
+    log.critical('===> PREPROCESSOR')
     exporter = MyLatexPDFExporter() if pdf else MyLatexExporter()
+    # First thing to do, associate preprocessor.
+    exporter.preprocessors = [tag_preprocessor]
+
     if template_file is not None:
         exporter.template_file = str(template_file)
+
     writer = FilesWriter(build_directory=str(output_file.parent))
     output, resources = exporter.from_notebook_node(combined_nb, resources)
     writer.write(output, resources, notebook_name=output_file.stem)

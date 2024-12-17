@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 def convert_link(key, val, fmt, meta):
-    logger.critical(f'KEY=[{key}] VAL=[{val}]')
+    # logger.critical(f'KEY=[{key}] VAL=[{val}]')
     if key == 'Link':
         target = val[2][0]
         # Links to other notebooks
